@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String @unique
+  hash  String
+
+  phone     Int?
+  firstName String?
+  lastName  String?
+  address   String?
+
+  comments ProductComments[]
+  orders   Orders[]
+  cart     Cart[]
+  roles    Role              @default(USER)
+}
+
+model Products {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productName        String
+  productDescription String
+  productPrice       Decimal //@db.Money
+  productImg         String
+  brandsId           Int?
+  tagsId             Int?
+  categoryId         Int?
+
+  brand    Brands?           @relation(fields: [brandsId], references: [id])
+  comments ProductComments[] //
+  tags     Tags?             @relation(fields: [tagsId], references: [id])
+  category Category?         @relation(fields: [categoryId], references: [id])
+}
+
+model Orders {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt //for delivery status later
+
+  userId          String
+  name            String
+  phone           Int
+  phone2          Int?
+  shippingAddress String
+  paynmentId      String
+  status          Boolean @default(false)
+  products        Json
+  totalAmount     Decimal
+  user            Users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId       String
+  productQuantity Int    @default(1)
+  userId          String
+  user            Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  products Products[]
+}
+
+model Brands {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  products Products[]
+}
+
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model ProductComments {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  feedback  String  @db.Text
+  userId    String?
+  productId String?
+
+  user    Users?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Products? @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+//for later
+model Tags {
+  id        Int        @id @default(autoincrement())
+  tagName   String
+  productId String
+  product   Products[]
+}
