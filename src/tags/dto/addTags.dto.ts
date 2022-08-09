@@ -1,15 +1,13 @@
 import {  IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class AddCommentDto {
+export class AddTags {
+
   @IsString()
   @IsNotEmpty()
-  feedback: string;
+  tagName: string;
 
   @IsString()
   @IsNotEmpty()
   productId: string;
 
-  // @IsString()
-  // @IsOptional()
-  // user?: string;
 }
